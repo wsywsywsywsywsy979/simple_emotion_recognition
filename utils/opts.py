@@ -1,0 +1,45 @@
+import argparse
+from email.policy import default
+import yaml
+
+class Config:
+    """dict -> Class"""
+    def __init__(self, entries: dict={}):
+        for k, v in entries.items():
+            if k != 'params' and isinstance(v, dict):
+                self.__dict__[k] = Config(v)
+            else:
+                self.__dict__[k] = v
+
+
+def load_config(file_path: str) -> dict:
+    """
+    从 YAML 文件中加载配置
+
+    Args:
+        file_path (str): 配置文件路径
+
+    Returns:
+        config (dict): 配置项
+    """
+    f = open(file_path, 'r', encoding = 'utf-8')
+    config = yaml.load(f.read(), Loader=yaml.FullLoader)
+    return config
+
+def parse_opt():
+    parser = argparse.ArgumentParser()
+    # config file
+    parser.add_argument(
+        '--config',
+        type = str,
+        # default = 'configs/lstm.yaml', # 设置模型配置文件 acc:0.888
+        # default= 'configs/cnn1d.yaml', # acc:0.664
+        # default= 'configs/mlp.yaml', # acc:0.897 
+        default= 'configs/svm.yaml', # acc:0.879
+        help = 'path to the configuration file (yaml)'
+    )
+    args = parser.parse_args()
+    config_dict = load_config(args.config)
+    config = Config(config_dict)
+
+    return config
